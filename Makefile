@@ -12,8 +12,8 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 RM = rm -f
 
-CLIENT = client
-SRVR = server
+CLIENT = bbman
+SRVR = host_bbman
 
 ${SRVR}: ${SSRC}
 	${CC} ${CFLAGS} ${SSRC} -I${INCS} -o ${SRVR}
@@ -28,10 +28,10 @@ clean:
 	${RM} ${CLIENT}
 
 runs: ${SRVR}
-	${SRVR}
+	./${SRVR}
 
 runc: ${CLIENT}
-	${CLIENT}
+	./${CLIENT}
 
 re: clean all
 
