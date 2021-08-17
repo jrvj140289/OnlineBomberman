@@ -1,38 +1,57 @@
-SFILES = server.c
-SDIR = server/
-SSRC = ${addprefix ${SDIR}, ${SFILES}}
+# Server info
+SRVR_FS = server.c
+SRVR_DIR = server
+SRVR_SRC := $(SRVR_FS:%=SRVR_DIR/src/%)
+SRVR_BD := $(SRVR_FS:%.c=SRVR_DIR/obj/%.o)
 
-CFILES = client.c
-CDIR = client/
-CSRC = ${addprefix ${CDIR}, ${CFILES}}
+# Client info
+CLNT_FS = client.c
+CLNT_DIR = client
+CLNT_SRC := $(CLNT_FS:%=$(CLNT_DIR)/src/%)
+CLNT_BD := $(CLNT_FS:%.c=$(CLNT_DIR)/obj/%.o)
 
-INCS = includes/
+# General info
+INC = includes/
 
+# Compiler info
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 RM = rm -f
 
+# Programs names
 CLIENT = bbman
-SRVR = host_bbman
+SERVER = host_bbman
 
-${SRVR}: ${SSRC}
-	${CC} ${CFLAGS} ${SSRC} -I${INCS} -o ${SRVR}
+# Build step for client
+$(CLNT_BD): $(CLNT_SRC)
+	$(CC) $(CFLAGS) -I$(INC) -I$(CLNT_DIR)/$(INC) -c $< -o $@
 
-${CLIENT}: ${CSRC}
-	${CC} ${CFLAGS} ${CSRC} -I${INCS} -o ${CLIENT}
+$(CLIENT): $(CLNT_BD)
+	$(CC) $(CFLAGS) $(CLNT_BD) $(CLNT_DIR)/main.c -I$(INC) -I$(CLNT_DIR)/$(INC)
+
+# Build step for server
+$(SRVR_BD): $(SRVR_SRC)
+	$(CC) $(CFLAGS) -I$(INC) -I$(CLNT_DIR)/$(INC) -c $< -o $@
+
+$(SERVER): $(SRVR_BD)
+	$(CC) $(CFLAGS) $(SRVR_BD) $(SRVR_DIR)/main.c -I$(INC) -I$(SRVR_DIR)/$(INC)
 
 all: ${SRVR} ${CLIENT}
 
 clean:
-	${RM} ${SRVR}
-	${RM} ${CLIENT}
+	${RM} ${CLNT_BD}
+	${RM} ${SRVR_BD}
 
-runs: ${SRVR}
-	./${SRVR}
+fclean: clean
+	${RM} ${CLIENT}
+	${RM} ${SERVER}
 
 runc: ${CLIENT}
 	./${CLIENT}
 
-re: clean all
+runs: ${SRVR}
+	./${SRVR}
 
-.PHONY: all clean runs runc re
+re: fclean all
+
+.PHONY: all clean fclean runs runc re
